@@ -22,17 +22,17 @@ install:
 # Generate clean timer
 main:
 	@echo "Generating clean countdown timer..."
-	python main.py
+	uv run main.py
 
 # Generate weird glitchy timer
 weird:
 	@echo "Generating weird glitchy timer..."
-	python weird.py
+	uv run weird.py
 
 # Generate festival chaos timer
 festival:
 	@echo "Generating festival timer with animations..."
-	python festival.py
+	uv run festival.py
 
 # Generate all timers
 all: main weird festival
