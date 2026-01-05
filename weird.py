@@ -9,18 +9,23 @@ os.environ["FFMPEG_BINARY"] = "/usr/bin/ffmpeg"
 from pathlib import Path
 from moviepy.editor import VideoClip
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 import random
-import math
+
+from timer_utils import (
+    RESOLUTION,
+    BACKGROUND_COLOR,
+    TEXT_COLOR,
+    format_time,
+    load_digital_font,
+    get_codec_config,
+    corrupt_digit,
+    calculate_weird_time,
+)
 
 
 # Configuration
-RESOLUTION = (1920, 1080)
 FPS = 20
-BACKGROUND_COLOR = "black"
-TEXT_COLOR = "red"
-FONT_SIZE = 700
-USE_GPU = True  # Enable GPU acceleration if available
 
 # Timer settings
 DISPLAY_DURATION = 60  # Time shown on the timer (seconds)
@@ -28,99 +33,10 @@ ACTUAL_DURATION = 60  # Actual video duration (seconds)
 TIME_SCALE = DISPLAY_DURATION / ACTUAL_DURATION
 
 
-def format_time(seconds: float) -> str:
-    """Format seconds as MM:SS."""
-    mins = int(seconds // 60)
-    secs = int(seconds % 60)
-    return f"{mins:02d}:{secs:02d}"
-
-
-def corrupt_digit(char: str) -> str:
-    """Randomly corrupt a digit to look glitchy."""
-    if random.random() > 0.997:  # 0.3% chance of corruption
-        corruption_map = {
-            "0": [
-                "O",
-                "0",
-                "D",
-            ],
-            "1": ["I", "1", "|", "l"],
-            "2": ["Z", "2", "z"],
-            "3": ["3", "E"],
-            "4": ["4", "A"],
-            "5": ["S", "5", "s"],
-            "6": ["6", "G", "b"],
-            "7": ["7", "T"],
-            "8": ["8", "B"],
-            "9": ["9", "g", "q"],
-            ":": [":", ";"],
-        }
-        if char in corruption_map:
-            return random.choice(corruption_map[char])
-    return char
-
-
-def calculate_weird_time(t: float, duration: float) -> float:
-    """Calculate display time with weird speed variations and reversals."""
-    # Create zones with different behaviors
-    progress = t / duration
-
-    # Base speed with dramatic variations
-    speed_variation = 1.0 + 1.2 * math.sin(progress * math.pi * 3)
-
-    # Long reverse zones (very noticeable)
-    if 0.12 < progress < 0.22:  # 10% of video - long early reverse
-        speed_variation = -2.0
-    elif 0.35 < progress < 0.45:  # 10% of video - long mid reverse
-        speed_variation = -3.5
-    elif 0.68 < progress < 0.75:  # 7% of video - strong reverse
-        speed_variation = -4.0
-
-    # Dramatic slow motion zones
-    elif 0.25 < progress < 0.32:  # 7% of video - super slow
-        speed_variation = 0.15
-    elif 0.52 < progress < 0.58:  # 6% of video - crawling speed
-        speed_variation = 0.1
-
-    # Hyper speed zones
-    elif 0.60 < progress < 0.66:  # 6% of video - very fast
-        speed_variation = 5.0
-    elif progress > 0.82:  # Last 18% - extreme acceleration
-        speed_variation = 6.0
-
-    return speed_variation
-
-
 def generate_timer_video(output_path: str = "output/timer_test.mp4"):
     """Generate a countdown timer video."""
 
-    # Try to load a digital-style font (prioritize mono versions for consistent digit width)
-    home = Path.home()
-    digital_fonts = [
-        str(home / ".fonts/digital-7 (mono).ttf"),
-        str(home / ".fonts/digital-7.ttf"),
-        "/usr/share/fonts/truetype/digital-7/digital-7.ttf",
-        "Digital-7 Mono",
-        "Digital-7",
-        "digital-7",
-        "LCD",
-        "DSEG7Classic-Bold",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
-    ]
-
-    font = None
-    for font_name in digital_fonts:
-        try:
-            font = ImageFont.truetype(font_name, FONT_SIZE)
-            print(f"Using font: {font_name}")
-            break
-        except (OSError, IOError):
-            continue
-
-    if font is None:
-        font = ImageFont.load_default()
-        print("Warning: No digital font found. Install 'Digital-7' or similar for best results.")
-        print("Download from: https://www.1001fonts.com/digital-7-font.html")
+    font = load_digital_font()
 
     # Calculate center position
     center_x = RESOLUTION[0] // 2
@@ -223,44 +139,22 @@ def generate_timer_video(output_path: str = "output/timer_test.mp4"):
     print(f"  Effects: digit corruption, glitch lines, flickering, speed variations, reversals")
 
     # Configure codec based on GPU availability
-    if USE_GPU:
-        # AMD GPU using VAAPI
-        os.environ["LIBVA_DRIVER_NAME"] = "radeonsi"
-
-        codec = "h264_vaapi"
-        # Initialize hardware device and use hwupload with device reference
-        ffmpeg_params = [
-            "-init_hw_device",
-            "vaapi=va:/dev/dri/renderD128",
-            "-filter_hw_device",
-            "va",
-            "-vf",
-            "format=nv12,hwupload",
-            "-qp",
-            "23",
-        ]
-        print(f"  Codec: {codec} (AMD GPU accelerated via VAAPI)")
-    else:
-        codec = "libx264"
-        ffmpeg_params = ["-preset", "medium", "-crf", "23"]
-        print(f"  Codec: {codec} (CPU)")
+    codec, ffmpeg_params = get_codec_config()
 
     try:
         video.write_videofile(
             output_path, fps=FPS, codec=codec, audio=False, ffmpeg_params=ffmpeg_params
         )
     except Exception as e:
-        if USE_GPU:
-            print(f"GPU encoding failed, falling back to CPU: {e}")
-            video.write_videofile(
-                output_path,
-                fps=FPS,
-                codec="libx264",
-                audio=False,
-                ffmpeg_params=["-preset", "medium", "-crf", "23"],
-            )
-        else:
-            raise
+        print(f"GPU encoding failed, falling back to CPU: {e}")
+        codec, ffmpeg_params = get_codec_config(use_gpu=False)
+        video.write_videofile(
+            output_path,
+            fps=FPS,
+            codec=codec,
+            audio=False,
+            ffmpeg_params=ffmpeg_params,
+        )
 
     print(f"✓ Video saved to {output_path}")
 
