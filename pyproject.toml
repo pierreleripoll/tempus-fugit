@@ -1,0 +1,32 @@
+[project]
+name = "timer-video-generator"
+version = "0.1.0"
+description = "Generate timer videos with configurable time scales and effects"
+requires-python = ">=3.9"
+dependencies = [
+    "moviepy==1.0.3",
+    "numpy>=1.21.0",
+    "pillow>=9.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "ruff>=0.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.black]
+line-length = 100
+target-version = ["py39"]
