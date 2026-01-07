@@ -8,9 +8,9 @@ from pathlib import Path
 import tempfile
 import shutil
 
-st.set_page_config(page_title="Timer Video Generator", page_icon="⏱️", layout="wide")
+st.set_page_config(page_title="Timer Video Generator", page_icon="⏱", layout="wide")
 
-st.title("⏱️ Timer Video Generator")
+st.title("Timer Video Generator")
 st.markdown("### Easy interface to create custom timer videos")
 
 # Sidebar for timer type selection
@@ -27,13 +27,13 @@ timer_type = st.sidebar.radio(
 )
 
 # Main content area with tabs
-tab1, tab2, tab3 = st.tabs(["⚙️ Settings", "ℹ️ About", "📖 Instructions"])
+tab1, tab2, tab3 = st.tabs(["Settings", "About", "Instructions"])
 
 with tab1:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.subheader("⏰ Time Settings")
+        st.subheader("Time Settings")
 
         display_duration = st.number_input(
             "Display Duration (seconds)",
@@ -53,7 +53,7 @@ with tab1:
             help="How long the video file will be",
         )
 
-        st.subheader("🎬 Video Settings")
+        st.subheader("Video Settings")
 
         fps = st.slider(
             "FPS (Frames Per Second)",
@@ -71,7 +71,7 @@ with tab1:
     with col2:
         # Show different settings based on timer type
         if "Jump" in timer_type:
-            st.subheader("🦘 Jump Settings")
+            st.subheader("Jump Settings")
 
             jump_start = st.slider(
                 "Jump Position (%)",
@@ -101,7 +101,7 @@ with tab1:
             )
 
         elif "Simple" in timer_type:
-            st.subheader("🏃 Speed Settings")
+            st.subheader("Speed Settings")
 
             acceleration_start = st.slider(
                 "Acceleration Start (%)",
@@ -119,11 +119,11 @@ with tab1:
             )
 
         elif "Weird" in timer_type:
-            st.subheader("👾 Weird Settings")
+            st.subheader("Weird Settings")
             st.info("Weird timer has preset glitch effects and speed variations")
 
         elif "Festival" in timer_type:
-            st.subheader("🎪 Festival Settings")
+            st.subheader("Festival Settings")
             st.info("Festival timer has random jumps and animations built-in")
 
     st.divider()
@@ -132,14 +132,14 @@ with tab1:
     col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
 
     with col_btn2:
-        generate_button = st.button("🎬 Generate Video", type="primary", use_container_width=True)
+        generate_button = st.button("Generate Video", type="primary", use_container_width=True)
 
 with tab2:
     st.markdown(
         """
     ## About Timer Types
     
-    ### 🦘 Jump Timer (Theatrical)
+    ### Jump Timer (Theatrical)
     Perfect for live performances! The timer:
     - Runs normally for the first part
     - Starts glitching as a warning
@@ -148,7 +148,7 @@ with tab2:
     
     **Use case:** Creates stress and urgency for actors on stage
     
-    ### ⏱️ Simple Timer
+    ### Simple Timer
     Clean countdown with optional acceleration:
     - Normal countdown at 1:1 speed
     - Can accelerate smoothly or jump to faster speed
@@ -156,7 +156,7 @@ with tab2:
     
     **Use case:** Presentations, rehearsals, simple timing needs
     
-    ### 👾 Weird Timer
+    ### Weird Timer
     Glitchy artistic timer with:
     - Random digit corruptions
     - Speed variations and reversals
@@ -164,7 +164,7 @@ with tab2:
     
     **Use case:** Experimental performances, art installations
     
-    ### 🎪 Festival Timer
+    ### Festival Timer
     Chaotic timer with everything:
     - Random time jumps
     - Multiple animation modes
@@ -178,7 +178,7 @@ with tab2:
 with tab3:
     st.markdown(
         """
-    ## 📖 How to Use
+    ## How to Use
     
     ### For Complete Beginners:
     
@@ -204,7 +204,7 @@ with tab3:
     1. Check the error message in red text
     2. Try using default values
     3. Make sure "Display Duration" is reasonable (30-300 seconds)
-    4. Contact your friendly neighborhood developer! 😊
+    4. Contact your friendly neighborhood developer!
     """
     )
 
@@ -212,12 +212,12 @@ with tab3:
 if generate_button:
     # Validate settings
     if actual_duration <= 0 or display_duration <= 0:
-        st.error("❌ Duration values must be positive!")
+        st.error("Duration values must be positive!")
     else:
         # Create a temporary Python file with the settings
         output_path = f"output/{output_name}.mp4"
 
-        with st.spinner(f"🎬 Generating {timer_type}... This may take a few minutes..."):
+        with st.spinner(f"Generating {timer_type}... This may take a few minutes..."):
             try:
                 # Determine which script to modify and run
                 if "Jump" in timer_type:
@@ -347,18 +347,18 @@ festival.generate_timer_video(OUTPUT_PATH)
                 temp_script.unlink()
 
                 if result.returncode == 0:
-                    st.success(f"✅ Video generated successfully!")
-                    st.info(f"📁 Saved to: `{output_path}`")
+                    st.success(f"Video generated successfully!")
+                    st.info(f"Saved to: `{output_path}`")
 
                     # Preview the video
-                    st.subheader("🎥 Preview")
+                    st.subheader("Preview")
                     if Path(output_path).exists():
                         st.video(output_path)
 
                         # Download button
                         with open(output_path, "rb") as video_file:
                             st.download_button(
-                                label="⬇️ Download Video",
+                                label="Download Video",
                                 data=video_file,
                                 file_name=f"{output_name}.mp4",
                                 mime="video/mp4",
@@ -368,21 +368,21 @@ festival.generate_timer_video(OUTPUT_PATH)
                         st.warning("Video file not found. Check the output path.")
 
                     # Show details
-                    with st.expander("📊 Generation Details"):
+                    with st.expander("Generation Details"):
                         st.code(result.stdout)
                 else:
-                    st.error(f"❌ Generation failed!")
+                    st.error(f"Generation failed!")
                     st.code(result.stderr)
 
             except Exception as e:
-                st.error(f"❌ Error: {str(e)}")
+                st.error(f"Error: {str(e)}")
 
 # Footer
 st.divider()
 st.markdown(
     """
 <div style='text-align: center; color: #666;'>
-    <p>Timer Video Generator | Made with ❤️ using Streamlit</p>
+    <p>Timer Video Generator | Made with Streamlit</p>
     <p><small>No coding skills required - just adjust sliders and click generate!</small></p>
 </div>
 """,
