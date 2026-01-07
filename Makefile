@@ -1,4 +1,4 @@
-.PHONY: help install main jump weird festival all clean
+.PHONY: help install main jump weird festival all clean gui
 
 # Default target
 help:
@@ -6,6 +6,7 @@ help:
 	@echo ""
 	@echo "Available commands:"
 	@echo "  make install   - Install dependencies using uv"
+	@echo "  make gui       - Launch graphical interface (web browser)"
 	@echo "  make main      - Generate clean countdown timer (2:30)"
 	@echo "  make jump      - Generate jump countdown timer (1:50)"
 	@echo "  make weird     - Generate glitchy timer with effects (1:00)"
@@ -41,8 +42,15 @@ festival:
 	uv run festival.py
 
 # Generate all timers
-all: main weird festival
+all: main jump weird festival
 	@echo "✓ All timers generated"
+
+# Launch GUI
+gui:
+	@echo "Launching graphical interface..."
+	@echo "Browser will open at http://localhost:8501"
+	@echo "Press Ctrl+C to stop"
+	uv run streamlit run timer_gui.py
 
 # Clean output directory
 clean:
