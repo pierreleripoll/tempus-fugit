@@ -8,9 +8,9 @@ from pathlib import Path
 import tempfile
 import shutil
 
-st.set_page_config(page_title="Timer Video Generator", page_icon="⏱", layout="wide")
+st.set_page_config(page_title="Tempus Fugit", page_icon="⏱", layout="wide")
 
-st.title("Timer Video Generator")
+st.title("Tempus Fugit")
 st.markdown("### Easy interface to create custom timer videos")
 
 # Sidebar for timer type selection
@@ -276,7 +276,16 @@ if generate_button:
                     # Create temporary modified jump.py
                     script_content = f"""#!/usr/bin/env python3
 import os
-os.environ["FFMPEG_BINARY"] = "/usr/bin/ffmpeg"
+import shutil
+
+# Try to find ffmpeg automatically
+ffmpeg_path = shutil.which("ffmpeg")
+if ffmpeg_path:
+    os.environ["FFMPEG_BINARY"] = ffmpeg_path
+elif os.path.exists("/usr/bin/ffmpeg"):
+    os.environ["FFMPEG_BINARY"] = "/usr/bin/ffmpeg"
+# Otherwise let moviepy find it
+
 import sys
 sys.path.insert(0, '{Path(__file__).parent.absolute()}')
 
@@ -311,7 +320,16 @@ jump.generate_timer_video(OUTPUT_PATH)
                 elif "Simple" in timer_type:
                     script_content = f"""#!/usr/bin/env python3
 import os
-os.environ["FFMPEG_BINARY"] = "/usr/bin/ffmpeg"
+import shutil
+
+# Try to find ffmpeg automatically
+ffmpeg_path = shutil.which("ffmpeg")
+if ffmpeg_path:
+    os.environ["FFMPEG_BINARY"] = ffmpeg_path
+elif os.path.exists("/usr/bin/ffmpeg"):
+    os.environ["FFMPEG_BINARY"] = "/usr/bin/ffmpeg"
+# Otherwise let moviepy find it
+
 import sys
 sys.path.insert(0, '{Path(__file__).parent.absolute()}')
 
@@ -348,7 +366,16 @@ main.generate_timer_video(OUTPUT_PATH)
                 elif "Weird" in timer_type:
                     script_content = f"""#!/usr/bin/env python3
 import os
-os.environ["FFMPEG_BINARY"] = "/usr/bin/ffmpeg"
+import shutil
+
+# Try to find ffmpeg automatically
+ffmpeg_path = shutil.which("ffmpeg")
+if ffmpeg_path:
+    os.environ["FFMPEG_BINARY"] = ffmpeg_path
+elif os.path.exists("/usr/bin/ffmpeg"):
+    os.environ["FFMPEG_BINARY"] = "/usr/bin/ffmpeg"
+# Otherwise let moviepy find it
+
 import sys
 sys.path.insert(0, '{Path(__file__).parent.absolute()}')
 
@@ -380,7 +407,16 @@ weird.generate_timer_video(OUTPUT_PATH)
                 else:  # Festival
                     script_content = f"""#!/usr/bin/env python3
 import os
-os.environ["FFMPEG_BINARY"] = "/usr/bin/ffmpeg"
+import shutil
+
+# Try to find ffmpeg automatically
+ffmpeg_path = shutil.which("ffmpeg")
+if ffmpeg_path:
+    os.environ["FFMPEG_BINARY"] = ffmpeg_path
+elif os.path.exists("/usr/bin/ffmpeg"):
+    os.environ["FFMPEG_BINARY"] = "/usr/bin/ffmpeg"
+# Otherwise let moviepy find it
+
 import sys
 sys.path.insert(0, '{Path(__file__).parent.absolute()}')
 
@@ -462,8 +498,7 @@ st.divider()
 st.markdown(
     """
 <div style='text-align: center; color: #666;'>
-    <p>Timer Video Generator | Made with Streamlit</p>
-    <p><small>No coding skills required - just adjust sliders and click generate!</small></p>
+    <p>Tempus Fugit</p>
 </div>
 """,
     unsafe_allow_html=True,
