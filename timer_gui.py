@@ -120,11 +120,63 @@ with tab1:
 
         elif "Weird" in timer_type:
             st.subheader("Weird Settings")
-            st.info("Weird timer has preset glitch effects and speed variations")
+
+            corruption_frequency = st.slider(
+                "Corruption Frequency (%)",
+                min_value=0.0,
+                max_value=5.0,
+                value=0.3,
+                step=0.1,
+                help="Higher = more frequent glitches (0.3% = subtle, 5% = chaotic)",
+            )
+
+            corruption_duration = st.slider(
+                "Corruption Duration (seconds)",
+                min_value=0.1,
+                max_value=5.0,
+                value=2.5,
+                step=0.1,
+                help="How long each glitch persists",
+            )
 
         elif "Festival" in timer_type:
             st.subheader("Festival Settings")
-            st.info("Festival timer has random jumps and animations built-in")
+
+            num_jumps = st.slider(
+                "Number of Time Jumps",
+                min_value=0,
+                max_value=20,
+                value=5,
+                step=1,
+                help="Random time jumps throughout the video",
+            )
+
+            num_animations = st.slider(
+                "Number of Animation Events",
+                min_value=0,
+                max_value=20,
+                value=8,
+                step=1,
+                help="Visual animation effects (wave, spinning, etc.)",
+            )
+
+            corruption_frequency = st.slider(
+                "Digit Corruption (%)",
+                min_value=0.0,
+                max_value=5.0,
+                value=0.3,
+                step=0.1,
+                help="Frequency of digit glitches",
+            )
+
+            color_glitch_frequency = st.slider(
+                "Color Glitch (%)",
+                min_value=0.0,
+                max_value=2.0,
+                value=0.2,
+                step=0.1,
+                help="Frequency of color changes",
+            )
 
     st.divider()
 
@@ -304,11 +356,23 @@ FPS = {fps}
 DISPLAY_DURATION = {display_duration}
 ACTUAL_DURATION = {actual_duration}
 OUTPUT_PATH = "{output_path}"
+CORRUPTION_CHANCE = {1.0 - (corruption_frequency / 100.0)}
+CORRUPTION_DURATION_MAX = {corruption_duration}
 
 import weird
 weird.FPS = FPS
 weird.DISPLAY_DURATION = DISPLAY_DURATION
 weird.ACTUAL_DURATION = ACTUAL_DURATION
+
+# Patch corruption parameters in the make_frame function
+import timer_utils
+original_corrupt = timer_utils.corrupt_digit
+def patched_corrupt(char, corruption_chance=CORRUPTION_CHANCE):
+    return original_corrupt(char, corruption_chance)
+timer_utils.corrupt_digit = patched_corrupt
+
+# Store duration for use in weird.py
+weird.CORRUPTION_DURATION_MAX = CORRUPTION_DURATION_MAX
 
 weird.generate_timer_video(OUTPUT_PATH)
 """
@@ -323,10 +387,26 @@ sys.path.insert(0, '{Path(__file__).parent.absolute()}')
 FPS = {fps}
 ACTUAL_DURATION = {actual_duration}
 OUTPUT_PATH = "{output_path}"
+NUM_JUMPS = {num_jumps}
+NUM_ANIMATIONS = {num_animations}
+CORRUPTION_CHANCE = {1.0 - (corruption_frequency / 100.0)}
+COLOR_GLITCH_CHANCE = {1.0 - (color_glitch_frequency / 100.0)}
 
 import festival
 festival.FPS = FPS
 festival.ACTUAL_DURATION = ACTUAL_DURATION
+
+# Patch parameters
+festival.NUM_JUMPS = NUM_JUMPS
+festival.NUM_ANIMATIONS = NUM_ANIMATIONS
+
+import timer_utils
+original_corrupt = timer_utils.corrupt_digit
+def patched_corrupt(char, corruption_chance=CORRUPTION_CHANCE):
+    return original_corrupt(char, corruption_chance)
+timer_utils.corrupt_digit = patched_corrupt
+
+festival.COLOR_GLITCH_CHANCE = COLOR_GLITCH_CHANCE
 
 festival.generate_timer_video(OUTPUT_PATH)
 """

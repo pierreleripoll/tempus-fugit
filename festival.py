@@ -29,6 +29,9 @@ FPS = 25
 
 # Timer settings
 ACTUAL_DURATION = 120  # Actual video duration (seconds)
+NUM_JUMPS = 5  # Number of random time jumps (can be overridden)
+NUM_ANIMATIONS = 8  # Number of animation events (can be overridden)
+COLOR_GLITCH_CHANCE = 0.998  # Chance threshold for color glitches (can be overridden)
 
 
 def animate_digit_wave(base_time_str: str, wave_progress: float) -> str:
@@ -150,11 +153,19 @@ def generate_timer_video(output_path: str = "output/timer_test.mp4"):
     animation_duration = [0.0]
 
     # Random jump schedule
-    jump_times = sorted([random.uniform(5, ACTUAL_DURATION - 5) for _ in range(5)])
-    jump_targets = [random.uniform(0, 250) for _ in range(5)]
+    jump_times = (
+        sorted([random.uniform(5, ACTUAL_DURATION - 5) for _ in range(NUM_JUMPS)])
+        if NUM_JUMPS > 0
+        else []
+    )
+    jump_targets = [random.uniform(0, 250) for _ in range(NUM_JUMPS)]
 
     # Animation schedule - more frequent and starts earlier
-    anim_times = sorted([random.uniform(3, ACTUAL_DURATION - 3) for _ in range(8)])
+    anim_times = (
+        sorted([random.uniform(3, ACTUAL_DURATION - 3) for _ in range(NUM_ANIMATIONS)])
+        if NUM_ANIMATIONS > 0
+        else []
+    )
 
     def make_frame(t):
         """Generate a frame at time t with glitch effects."""
@@ -263,7 +274,7 @@ def generate_timer_video(output_path: str = "output/timer_test.mp4"):
             # Check if this position has active color change
             if i in color_state and t < color_state[i][1]:
                 char_color = color_state[i][0]
-            elif random.random() > 0.998:  # 0.2% chance per character
+            elif random.random() > COLOR_GLITCH_CHANCE:  # Configurable chance
                 new_color = "magenta"
                 duration = random.uniform(1.0, 3.0)
                 color_state[i] = (new_color, t + duration)

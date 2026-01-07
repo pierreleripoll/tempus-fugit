@@ -31,6 +31,7 @@ FPS = 20
 DISPLAY_DURATION = 60  # Time shown on the timer (seconds)
 ACTUAL_DURATION = 60  # Actual video duration (seconds)
 TIME_SCALE = DISPLAY_DURATION / ACTUAL_DURATION
+CORRUPTION_DURATION_MAX = 2.5  # Maximum corruption duration (can be overridden)
 
 
 def generate_timer_video(output_path: str = "output/timer_test.mp4"):
@@ -80,7 +81,7 @@ def generate_timer_video(output_path: str = "output/timer_test.mp4"):
                 corrupted_char = corrupt_digit(char)
                 if corrupted_char != char:
                     # New corruption created, store it with expiry time
-                    duration = random.uniform(0.3, 2.5)  # Last 0.3-2.5 seconds
+                    duration = random.uniform(0.3, CORRUPTION_DURATION_MAX)  # Variable duration
                     corruption_state[i] = (corrupted_char, t + duration)
                     corrupted_str += corrupted_char
                 else:
