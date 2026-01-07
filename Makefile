@@ -1,4 +1,4 @@
-.PHONY: help install main weird festival all clean
+.PHONY: help install main jump weird festival all clean
 
 # Default target
 help:
@@ -7,6 +7,7 @@ help:
 	@echo "Available commands:"
 	@echo "  make install   - Install dependencies using uv"
 	@echo "  make main      - Generate clean countdown timer (2:30)"
+	@echo "  make jump      - Generate jump countdown timer (1:50)"
 	@echo "  make weird     - Generate glitchy timer with effects (1:00)"
 	@echo "  make festival  - Generate festival timer with chaos (2:00)"
 	@echo "  make all       - Generate all three timers"
@@ -23,6 +24,11 @@ install:
 main:
 	@echo "Generating clean countdown timer..."
 	uv run main.py
+
+# Generate jump timer
+jump:
+	@echo "Generating jump countdown timer..."
+	uv run jump.py
 
 # Generate weird glitchy timer
 weird:
